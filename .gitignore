@@ -1,21 +1,33 @@
-# Virtual Environment
-venv/
-
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
 
-# SQLite Database
-db.sqlite3
+# Virtual environments
+venv/
+venv_old/
+.venv/
+env/
 
-# Environment Variables
+# Environment variables
 .env
+.env.*
+!.env.example
 
-# VS Code
-.vscode/
-
-# macOS
-.DS_Store
-
-# Logs
+# Django
 *.log
+db.sqlite3
+media/
+staticfiles/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
