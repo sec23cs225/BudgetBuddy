@@ -1,0 +1,976 @@
+/* =========================================================
+   BUDGETBUDDY — PREMIUM APPLICATION LAYOUT
+   Design System: Obsidian Wealth
+   ========================================================= */
+
+/* =========================================================
+   ROOT DESIGN TOKENS
+   ========================================================= */
+
+:root {
+    --bb-bg: #07090d;
+    --bb-bg-secondary: #0a0e14;
+
+    --bb-sidebar: #090d13;
+    --bb-surface: #0e141c;
+    --bb-surface-raised: #131b25;
+    --bb-surface-hover: #17212d;
+
+    --bb-gold: #d8b46a;
+    --bb-gold-light: #f0d79d;
+    --bb-gold-dark: #a98745;
+
+    --bb-emerald: #42d3a5;
+    --bb-emerald-dark: #219878;
+
+    --bb-text: #f4f0e7;
+    --bb-text-secondary: #d8d3c8;
+    --bb-text-muted: #98a2b3;
+    --bb-text-faint: #687386;
+
+    --bb-danger: #e56b6f;
+    --bb-warning: #e4b45d;
+    --bb-info: #5dd6e8;
+
+    --bb-border: rgba(255, 255, 255, 0.07);
+    --bb-border-strong: rgba(216, 180, 106, 0.16);
+
+    --bb-shadow-sm:
+        0 8px 24px rgba(0, 0, 0, 0.16);
+
+    --bb-shadow-md:
+        0 16px 40px rgba(0, 0, 0, 0.24);
+
+    --bb-shadow-lg:
+        0 24px 70px rgba(0, 0, 0, 0.32);
+
+    --bb-glow-gold:
+        0 0 35px rgba(216, 180, 106, 0.08);
+
+    --bb-radius-sm: 8px;
+    --bb-radius-md: 12px;
+    --bb-radius-lg: 16px;
+    --bb-radius-xl: 22px;
+
+    --bb-sidebar-width: 240px;
+    --bb-topbar-height: 72px;
+
+    --bb-transition:
+        180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* =========================================================
+   APPLICATION ROOT
+   ========================================================= */
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+html {
+    background: var(--bb-bg);
+}
+
+body {
+    margin: 0;
+    background: var(--bb-bg);
+    color: var(--bb-text);
+}
+
+
+/* =========================================================
+   MAIN APPLICATION SHELL
+   ========================================================= */
+
+.app-main {
+    min-height: 100vh;
+
+    margin-left: var(--bb-sidebar-width);
+
+    background:
+        radial-gradient(
+            circle at 85% 0%,
+            rgba(216, 180, 106, 0.045),
+            transparent 27%
+        ),
+        radial-gradient(
+            circle at 15% 85%,
+            rgba(66, 211, 165, 0.025),
+            transparent 25%
+        ),
+        var(--bb-bg);
+
+    color: var(--bb-text);
+
+    position: relative;
+}
+
+
+/* =========================================================
+   TOPBAR AREA
+   ========================================================= */
+
+.app-main > header {
+    height: var(--bb-topbar-height);
+
+    position: sticky;
+    top: 0;
+
+    z-index: 900;
+
+    background:
+        rgba(7, 9, 13, 0.86);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    border-bottom:
+        1px solid var(--bb-border);
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.10);
+}
+
+
+/* =========================================================
+   CONTENT AREA
+   ========================================================= */
+
+.app-content {
+    min-height:
+        calc(100vh - var(--bb-topbar-height));
+
+    padding:
+        28px 32px 48px;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   PREMIUM CONTENT BACKGROUND
+   ========================================================= */
+
+.app-content::before {
+    content: "";
+
+    position: fixed;
+
+    width: 420px;
+    height: 420px;
+
+    top: 90px;
+    right: -180px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(216, 180, 106, 0.035),
+            transparent 68%
+        );
+
+    pointer-events: none;
+
+    z-index: -1;
+}
+
+
+/* =========================================================
+   SIDEBAR FOUNDATION
+   ========================================================= */
+
+.app-main ~ aside,
+aside {
+    background:
+        linear-gradient(
+            180deg,
+            #090d13 0%,
+            #070a0f 100%
+        ) !important;
+
+    border-right:
+        1px solid rgba(216, 180, 106, 0.08) !important;
+
+    box-shadow:
+        12px 0 40px rgba(0, 0, 0, 0.12);
+
+    width:
+        var(--bb-sidebar-width);
+}
+
+
+/* =========================================================
+   SIDEBAR NAVIGATION
+   ========================================================= */
+
+aside a {
+    transition:
+        background var(--bb-transition),
+        color var(--bb-transition),
+        border-color var(--bb-transition),
+        transform var(--bb-transition);
+}
+
+
+/* Active navigation */
+
+aside a[aria-current="page"] {
+    color:
+        var(--bb-gold-light) !important;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(216, 180, 106, 0.13),
+            rgba(216, 180, 106, 0.025)
+        ) !important;
+
+    border-left-color:
+        var(--bb-gold) !important;
+
+    box-shadow:
+        inset 0 0 22px
+        rgba(216, 180, 106, 0.025);
+}
+
+
+/* Navigation hover */
+
+aside a:hover {
+    color:
+        var(--bb-text-secondary) !important;
+
+    background:
+        rgba(216, 180, 106, 0.045) !important;
+}
+
+
+/* =========================================================
+   PREMIUM CARD SYSTEM
+   ========================================================= */
+
+.bb-card {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19, 27, 37, 0.96),
+            rgba(10, 15, 22, 0.96)
+        );
+
+    border:
+        1px solid var(--bb-border);
+
+    border-radius:
+        var(--bb-radius-lg);
+
+    box-shadow:
+        var(--bb-shadow-sm);
+
+    transition:
+        transform var(--bb-transition),
+        border-color var(--bb-transition),
+        box-shadow var(--bb-transition);
+}
+
+
+.bb-card:hover {
+    transform:
+        translateY(-2px);
+
+    border-color:
+        var(--bb-border-strong);
+
+    box-shadow:
+        var(--bb-shadow-md),
+        var(--bb-glow-gold);
+}
+
+
+/* =========================================================
+   PREMIUM SECTION
+   ========================================================= */
+
+.bb-section {
+    margin-bottom: 28px;
+}
+
+
+.bb-section-title {
+    color:
+        var(--bb-text);
+
+    font-size:
+        18px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        -0.35px;
+
+    margin:
+        0 0 5px;
+}
+
+
+.bb-section-subtitle {
+    color:
+        var(--bb-text-muted);
+
+    font-size:
+        11px;
+
+    line-height:
+        1.6;
+
+    margin:
+        0;
+}
+
+
+/* =========================================================
+   EYEBROW LABEL
+   ========================================================= */
+
+.bb-eyebrow {
+    color:
+        var(--bb-gold);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        1.6px;
+
+    text-transform:
+        uppercase;
+}
+
+
+/* =========================================================
+   FINANCIAL METRIC
+   ========================================================= */
+
+.bb-metric {
+    color:
+        var(--bb-text);
+
+    font-size:
+        28px;
+
+    line-height:
+        1.1;
+
+    font-weight:
+        750;
+
+    letter-spacing:
+        -1px;
+}
+
+
+.bb-metric-positive {
+    color:
+        var(--bb-emerald);
+}
+
+
+.bb-metric-negative {
+    color:
+        var(--bb-danger);
+}
+
+
+.bb-metric-accent {
+    color:
+        var(--bb-gold-light);
+}
+
+
+/* =========================================================
+   PREMIUM BUTTON FOUNDATION
+   ========================================================= */
+
+.bb-button {
+    min-height:
+        40px;
+
+    padding:
+        0 16px;
+
+    border:
+        1px solid transparent;
+
+    border-radius:
+        var(--bb-radius-sm);
+
+    font-size:
+        11px;
+
+    font-weight:
+        700;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform var(--bb-transition),
+        background var(--bb-transition),
+        border-color var(--bb-transition),
+        box-shadow var(--bb-transition);
+}
+
+
+.bb-button-primary {
+    background:
+        linear-gradient(
+            135deg,
+            var(--bb-gold),
+            var(--bb-gold-light)
+        );
+
+    color:
+        #17120a;
+
+    box-shadow:
+        0 8px 24px
+        rgba(216, 180, 106, 0.12);
+}
+
+
+.bb-button-primary:hover {
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 12px 30px
+        rgba(216, 180, 106, 0.20);
+}
+
+
+.bb-button-secondary {
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    color:
+        var(--bb-text-secondary);
+
+    border-color:
+        var(--bb-border);
+}
+
+
+.bb-button-secondary:hover {
+    background:
+        rgba(216, 180, 106, 0.055);
+
+    border-color:
+        var(--bb-border-strong);
+}
+
+
+/* =========================================================
+   FORM FOUNDATION
+   ========================================================= */
+
+.bb-input,
+.bb-select,
+.bb-textarea {
+    width:
+        100%;
+
+    background:
+        rgba(255, 255, 255, 0.025);
+
+    color:
+        var(--bb-text);
+
+    border:
+        1px solid var(--bb-border);
+
+    border-radius:
+        var(--bb-radius-sm);
+
+    outline:
+        none;
+
+    transition:
+        border-color var(--bb-transition),
+        box-shadow var(--bb-transition),
+        background var(--bb-transition);
+}
+
+
+.bb-input:focus,
+.bb-select:focus,
+.bb-textarea:focus {
+    border-color:
+        rgba(216, 180, 106, 0.42);
+
+    background:
+        rgba(216, 180, 106, 0.025);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(216, 180, 106, 0.06);
+}
+
+
+.bb-input::placeholder,
+.bb-textarea::placeholder {
+    color:
+        var(--bb-text-faint);
+}
+
+
+/* =========================================================
+   TABLE FOUNDATION
+   ========================================================= */
+
+.bb-table {
+    width:
+        100%;
+
+    border-collapse:
+        separate;
+
+    border-spacing:
+        0;
+
+    color:
+        var(--bb-text);
+}
+
+
+.bb-table th {
+    color:
+        var(--bb-text-faint);
+
+    font-size:
+        9px;
+
+    font-weight:
+        750;
+
+    letter-spacing:
+        0.8px;
+
+    text-transform:
+        uppercase;
+
+    text-align:
+        left;
+
+    padding:
+        13px 16px;
+
+    border-bottom:
+        1px solid var(--bb-border);
+}
+
+
+.bb-table td {
+    color:
+        var(--bb-text-secondary);
+
+    font-size:
+        11px;
+
+    padding:
+        15px 16px;
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.045);
+}
+
+
+.bb-table tbody tr {
+    transition:
+        background var(--bb-transition);
+}
+
+
+.bb-table tbody tr:hover {
+    background:
+        rgba(216, 180, 106, 0.025);
+}
+
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+.bb-status {
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    min-height:
+        24px;
+
+    padding:
+        0 9px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        9px;
+
+    font-weight:
+        700;
+}
+
+
+.bb-status-success {
+    color:
+        var(--bb-emerald);
+
+    background:
+        rgba(66, 211, 165, 0.08);
+}
+
+
+.bb-status-warning {
+    color:
+        var(--bb-warning);
+
+    background:
+        rgba(228, 180, 93, 0.08);
+}
+
+
+.bb-status-danger {
+    color:
+        var(--bb-danger);
+
+    background:
+        rgba(229, 107, 111, 0.08);
+}
+
+
+.bb-status-neutral {
+    color:
+        var(--bb-text-muted);
+
+    background:
+        rgba(255, 255, 255, 0.05);
+}
+
+
+/* =========================================================
+   PROGRESS BAR
+   ========================================================= */
+
+.bb-progress {
+    width:
+        100%;
+
+    height:
+        6px;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        20px;
+
+    background:
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.bb-progress-value {
+    height:
+        100%;
+
+    border-radius:
+        inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--bb-gold-dark),
+            var(--bb-gold-light)
+        );
+
+    transition:
+        width 500ms cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        );
+}
+
+
+/* =========================================================
+   EMPTY STATES
+   ========================================================= */
+
+.bb-empty {
+    min-height:
+        220px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    text-align:
+        center;
+
+    padding:
+        30px;
+
+    color:
+        var(--bb-text-muted);
+}
+
+
+.bb-empty-title {
+    color:
+        var(--bb-text-secondary);
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+
+    margin-bottom:
+        5px;
+}
+
+
+.bb-empty-description {
+    color:
+        var(--bb-text-faint);
+
+    font-size:
+        10px;
+
+    line-height:
+        1.6;
+}
+
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+
+.bb-divider {
+    height:
+        1px;
+
+    width:
+        100%;
+
+    background:
+        var(--bb-border);
+}
+
+
+/* =========================================================
+   MUI COMPATIBILITY
+   ========================================================= */
+
+.MuiPaper-root {
+    background:
+        var(--bb-surface) !important;
+
+    color:
+        var(--bb-text) !important;
+
+    border:
+        1px solid var(--bb-border);
+
+    box-shadow:
+        var(--bb-shadow-sm) !important;
+}
+
+
+.MuiButton-contained {
+    background:
+        linear-gradient(
+            135deg,
+            var(--bb-gold),
+            var(--bb-gold-light)
+        ) !important;
+
+    color:
+        #17120a !important;
+
+    font-weight:
+        750 !important;
+}
+
+
+.MuiButton-contained:hover {
+    background:
+        linear-gradient(
+            135deg,
+            var(--bb-gold-light),
+            var(--bb-gold)
+        ) !important;
+}
+
+
+.MuiTypography-root {
+    font-family:
+        inherit;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+    width:
+        7px;
+
+    height:
+        7px;
+}
+
+
+::-webkit-scrollbar-track {
+    background:
+        var(--bb-bg);
+}
+
+
+::-webkit-scrollbar-thumb {
+    background:
+        rgba(216, 180, 106, 0.20);
+
+    border-radius:
+        20px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+    background:
+        rgba(216, 180, 106, 0.35);
+}
+
+
+/* =========================================================
+   SELECTION
+   ========================================================= */
+
+::selection {
+    background:
+        rgba(216, 180, 106, 0.22);
+
+    color:
+        var(--bb-gold-light);
+}
+
+
+/* =========================================================
+   RESPONSIVE APPLICATION LAYOUT
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .app-content {
+        padding:
+            24px 24px 40px;
+    }
+
+}
+
+
+@media (max-width: 900px) {
+
+    .app-main {
+        margin-left:
+            0;
+    }
+
+    .app-main > header {
+        padding:
+            0 20px;
+    }
+
+    .app-content {
+        padding:
+            22px 18px 36px;
+    }
+
+    aside {
+        display:
+            none !important;
+    }
+
+}
+
+
+@media (max-width: 640px) {
+
+    .app-main > header {
+        height:
+            64px;
+    }
+
+    .app-content {
+        min-height:
+            calc(100vh - 64px);
+
+        padding:
+            18px 14px 30px;
+    }
+
+    .app-main {
+        width:
+            100%;
+    }
+
+    .bb-metric {
+        font-size:
+            24px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior:
+            auto !important;
+
+        transition:
+            none !important;
+
+        animation:
+            none !important;
+    }
+
+}

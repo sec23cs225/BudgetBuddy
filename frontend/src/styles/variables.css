@@ -1,0 +1,146 @@
+:root {
+
+    /* =====================================================
+       DARK — PREMIUM FINANCE
+    ===================================================== */
+
+    --bb-bg:
+        #080b10;
+
+    --bb-surface:
+        #0e131a;
+
+    --bb-surface-2:
+        #121922;
+
+    --bb-surface-3:
+        #171f29;
+
+    --bb-text:
+        #f5f7f7;
+
+    --bb-text-secondary:
+        #c5cfcb;
+
+    --bb-text-muted:
+        #8c9894;
+
+    --bb-text-faint:
+        #66716d;
+
+    --bb-border:
+        rgba(255,255,255,.09);
+
+    --bb-border-soft:
+        rgba(255,255,255,.055);
+
+    --bb-input:
+        #0b1118;
+
+    --bb-primary:
+        #08d69b;
+
+    --bb-primary-hover:
+        #11e3a7;
+
+    --bb-primary-soft:
+        rgba(8,214,155,.10);
+
+    --bb-gold:
+        #d6b05c;
+
+    --bb-gold-soft:
+        rgba(214,176,92,.10);
+
+    --bb-danger:
+        #ef626b;
+
+    --bb-danger-soft:
+        rgba(239,98,107,.09);
+
+    --bb-purple:
+        #9b72ff;
+
+    --bb-blue:
+        #45b9ff;
+
+    --bb-shadow:
+        0 18px 45px rgba(0,0,0,.28);
+
+    --bb-radius:
+        14px;
+
+    --bb-radius-sm:
+        9px;
+}
+
+
+/* =========================================================
+   LIGHT — PREMIUM FINANCE
+========================================================= */
+
+html[data-theme="light"] {
+
+    --bb-bg:
+        #f4f6f5;
+
+    --bb-surface:
+        #ffffff;
+
+    --bb-surface-2:
+        #f9fbfa;
+
+    --bb-surface-3:
+        #eef2f0;
+
+    --bb-text:
+        #14201d;
+
+    --bb-text-secondary:
+        #34433e;
+
+    --bb-text-muted:
+        #61706a;
+
+    --bb-text-faint:
+        #87938e;
+
+    --bb-border:
+        rgba(20,32,29,.105);
+
+    --bb-border-soft:
+        rgba(20,32,29,.065);
+
+    --bb-input:
+        #ffffff;
+
+    --bb-primary:
+        #00b982;
+
+    --bb-primary-hover:
+        #00a978;
+
+    --bb-primary-soft:
+        rgba(0,185,130,.09);
+
+    --bb-gold:
+        #a87822;
+
+    --bb-gold-soft:
+        rgba(168,120,34,.085);
+
+    --bb-danger:
+        #d9535d;
+
+    --bb-danger-soft:
+        rgba(217,83,93,.075);
+
+    --bb-purple:
+        #7650d9;
+
+    --bb-blue:
+        #218bc9;
+
+    --bb-shadow:
+        0 14px 35px rgba(30,45,40,.09);
+}
