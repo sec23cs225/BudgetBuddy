@@ -8,30 +8,10 @@ BUDGETBUDDY API CLIENT
 */
 
 const api = axios.create({
-    /*
-    --------------------------------------------------------
-    BACKEND URL
-    --------------------------------------------------------
-
-    Keep localhost consistent with the frontend and
-    Django CORS configuration.
-    */
-
-    baseURL: "http://localhost:8000",
-
+    baseURL:import.meta.env.VITE_API_URL,
     headers: {
         "Content-Type": "application/json",
     },
-
-    /*
-    --------------------------------------------------------
-    COOKIE AUTHENTICATION
-    --------------------------------------------------------
-
-    Allows the browser to automatically send the
-    HttpOnly BudgetBuddy authentication cookies.
-    */
-
     withCredentials: true,
 });
 
