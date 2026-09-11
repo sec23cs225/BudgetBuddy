@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
     Wallet,
@@ -386,8 +386,25 @@ export default function Budgets() {
     const [toastMessage, setToastMessage] =
         useState("");
 
-    const showSuccessToast = (message) => {
+    const [toastType, setToastType] =
+        useState("success");
+
+    const [deleteDialogOpen, setDeleteDialogOpen] =
+        useState(false);
+
+    const [selectedBudgetId, setSelectedBudgetId] =
+        useState(null);
+
+    const formSectionRef = useRef(null);
+
+    const titleInputRef = useRef(null);
+
+    const showToast = (
+        message,
+        type = "success"
+    ) => {
         setToastMessage(message);
+        setToastType(type);
 
         window.setTimeout(() => {
             setToastMessage("");
@@ -491,6 +508,20 @@ export default function Budgets() {
        OPEN CREATE FORM
     ===================================================== */
 
+    const scrollToBudgetForm = () => {
+        window.setTimeout(() => {
+            formSectionRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+
+            window.setTimeout(() => {
+                titleInputRef.current?.focus();
+            }, 500);
+        }, 80);
+    };
+
+
     const openCreateForm = () => {
         setEditingBudget(null);
 
@@ -503,10 +534,7 @@ export default function Budgets() {
 
         setShowForm(true);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        scrollToBudgetForm();
     };
 
 
@@ -536,10 +564,7 @@ export default function Budgets() {
 
         setShowForm(true);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        scrollToBudgetForm();
     };
 
 
@@ -691,8 +716,9 @@ export default function Budgets() {
 
                 setShowForm(false);
 
-                showSuccessToast(
-                    "Budget created successfully."
+                showToast(
+                    "Budget created successfully.",
+                    "success"
                 );
 
                 return;
@@ -725,23 +751,35 @@ export default function Budgets() {
        DELETE
     ===================================================== */
 
-    const handleDelete = async (id) => {
-        const confirmed =
-            window.confirm(
-                "Are you sure you want to delete this budget?"
-            );
+    const handleDelete = (id) => {
+        setSelectedBudgetId(id);
+        setDeleteDialogOpen(true);
+    };
 
-        if (!confirmed) {
+
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setSelectedBudgetId(null);
+    };
+
+
+    const confirmDelete = async () => {
+        if (!selectedBudgetId) {
             return;
         }
 
         try {
-            await deleteBudget(id);
+            await deleteBudget(
+                selectedBudgetId
+            );
 
             await fetchBudgets();
 
-            alert(
-                "Budget deleted successfully."
+            closeDeleteDialog();
+
+            showToast(
+                "Budget deleted successfully.",
+                "success"
             );
         } catch (error) {
             console.error(
@@ -749,8 +787,11 @@ export default function Budgets() {
                 error.response?.data || error
             );
 
-            alert(
-                getErrorMessage(error)
+            closeDeleteDialog();
+
+            showToast(
+                getErrorMessage(error),
+                "error"
             );
         }
     };
@@ -1069,20 +1110,32 @@ export default function Budgets() {
                         position: "fixed",
                         right: "24px",
                         bottom: "24px",
-                        zIndex: 1000,
+                        zIndex: 1200,
                         display: "flex",
                         alignItems: "center",
                         gap: "10px",
-                        maxWidth: "calc(100vw - 48px)",
+                        maxWidth:
+                            "calc(100vw - 48px)",
                         padding: "13px 16px",
-                        border: "1px solid rgba(52,211,153,.28)",
+                        border:
+                            toastType === "success"
+                                ? "1px solid rgba(52,211,153,.28)"
+                                : "1px solid rgba(251,113,133,.28)",
                         borderRadius: "12px",
-                        background: "#10261F",
-                        boxShadow: "0 16px 40px rgba(0,0,0,.28)",
-                        color: "#D1FAE5",
+                        background:
+                            toastType === "success"
+                                ? "#10261F"
+                                : "#29151B",
+                        boxShadow:
+                            "0 16px 40px rgba(0,0,0,.28)",
+                        color:
+                            toastType === "success"
+                                ? "#D1FAE5"
+                                : "#FFE4E6",
                         fontSize: "13px",
                         fontWeight: 700,
-                        animation: "budget-toast-fade 3.5s ease forwards",
+                        animation:
+                            "budget-toast-fade 3.5s ease forwards",
                     }}
                 >
                     <span
@@ -1092,19 +1145,182 @@ export default function Budgets() {
                             height: "20px",
                             display: "grid",
                             placeItems: "center",
+                            flexShrink: 0,
                             borderRadius: "50%",
-                            background: "#10B981",
-                            color: "#052E24",
-                            fontSize: "13px",
+                            background:
+                                toastType === "success"
+                                    ? "#10B981"
+                                    : "#FB7185",
+                            color: "#FFFFFF",
+                            fontSize: "12px",
                             fontWeight: 900,
                         }}
                     >
-                        ✓
+                        {toastType === "success"
+                            ? "✓"
+                            : "!"}
                     </span>
 
-                    {toastMessage}
+                    <span
+                        style={{
+                            whiteSpace: "pre-line",
+                        }}
+                    >
+                        {toastMessage}
+                    </span>
                 </div>
             )}
+
+
+            {/* =================================================
+                DELETE CONFIRMATION
+            ================================================= */}
+
+            {deleteDialogOpen && (
+                <div
+                    role="presentation"
+                    onClick={closeDeleteDialog}
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 1100,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "20px",
+                        background:
+                            "rgba(2,6,23,.68)",
+                        backdropFilter:
+                            "blur(7px)",
+                        WebkitBackdropFilter:
+                            "blur(7px)",
+                    }}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="delete-budget-title"
+                        onClick={(event) =>
+                            event.stopPropagation()
+                        }
+                        style={{
+                            width: "100%",
+                            maxWidth: "400px",
+                            padding: "24px",
+                            boxSizing: "border-box",
+                            borderRadius: "18px",
+                            background:
+                                "linear-gradient(145deg,#111B28,#0B131D)",
+                            border:
+                                "1px solid rgba(251,113,133,.20)",
+                            boxShadow:
+                                "0 25px 70px rgba(0,0,0,.40)",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "46px",
+                                height: "46px",
+                                display: "grid",
+                                placeItems: "center",
+                                marginBottom: "16px",
+                                borderRadius: "13px",
+                                color: "#FB7185",
+                                background:
+                                    "rgba(251,113,133,.10)",
+                                border:
+                                    "1px solid rgba(251,113,133,.16)",
+                            }}
+                        >
+                            <Trash2 size={20} />
+                        </div>
+
+                        <h3
+                            id="delete-budget-title"
+                            style={{
+                                margin: 0,
+                                color: "#F8FAFC",
+                                fontSize: "18px",
+                                fontWeight: 800,
+                                letterSpacing: "-.25px",
+                            }}
+                        >
+                            Delete this budget?
+                        </h3>
+
+                        <p
+                            style={{
+                                margin: "9px 0 0",
+                                color: "#94A3B8",
+                                fontSize: "12px",
+                                lineHeight: 1.6,
+                            }}
+                        >
+                            This budget will be permanently
+                            removed from your spending plans.
+                            This action cannot be undone.
+                        </p>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: "9px",
+                                marginTop: "23px",
+                            }}
+                        >
+                            <button
+                                type="button"
+                                onClick={closeDeleteDialog}
+                                style={{
+                                    height: "40px",
+                                    padding: "0 16px",
+                                    borderRadius: "9px",
+                                    border:
+                                        "1px solid rgba(148,163,184,.15)",
+                                    background:
+                                        "rgba(148,163,184,.06)",
+                                    color: "#AAB4C3",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "12px",
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "7px",
+                                    height: "40px",
+                                    padding: "0 17px",
+                                    border: 0,
+                                    borderRadius: "9px",
+                                    background:
+                                        "linear-gradient(135deg,#FB7185,#E11D48)",
+                                    color: "#FFFFFF",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "12px",
+                                    fontWeight: 800,
+                                    boxShadow:
+                                        "0 8px 20px rgba(225,29,72,.20)",
+                                }}
+                            >
+                                <Trash2 size={14} />
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* =================================================
                 HERO
@@ -1470,7 +1686,9 @@ export default function Budgets() {
 
             {showForm && (
                 <section
+                    ref={formSectionRef}
                     style={{
+                        scrollMarginTop: "24px",
                         marginBottom: "24px",
                         padding: "24px",
                         borderRadius: "16px",
@@ -1568,6 +1786,7 @@ export default function Budgets() {
                             <Field label="BUDGET TITLE">
 
                                 <input
+                                    ref={titleInputRef}
                                     type="text"
                                     name="title"
                                     placeholder="e.g. August Food Budget"
@@ -3163,6 +3382,31 @@ export default function Budgets() {
                         100% {
                             opacity: 0;
                             transform: translateY(8px);
+                        }
+                    }
+
+                    @media (prefers-color-scheme: light) {
+                        [role="dialog"] {
+                            background:
+                                linear-gradient(145deg,#FFFFFF,#F8FAFC) !important;
+                            border-color:
+                                rgba(225,29,72,.14) !important;
+                            box-shadow:
+                                0 25px 70px rgba(15,23,42,.18) !important;
+                        }
+
+                        [role="dialog"] h3 {
+                            color: #0F172A !important;
+                        }
+
+                        [role="dialog"] p {
+                            color: #64748B !important;
+                        }
+
+                        [role="dialog"] button:first-of-type {
+                            background: #F8FAFC !important;
+                            color: #475569 !important;
+                            border-color: #E2E8F0 !important;
                         }
                     }
                 `}

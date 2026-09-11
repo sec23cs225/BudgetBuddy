@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
     Wallet,
@@ -389,12 +389,41 @@ export default function Expenses() {
     const [toastMessage, setToastMessage] =
         useState("");
 
-    const showSuccessToast = (message) => {
+    const [toastType, setToastType] =
+        useState("success");
+
+    const [deleteDialogOpen, setDeleteDialogOpen] =
+        useState(false);
+
+    const [selectedExpenseId, setSelectedExpenseId] =
+        useState(null);
+
+    const formSectionRef = useRef(null);
+    const titleInputRef = useRef(null);
+
+    const showToast = (
+        message,
+        type = "success"
+    ) => {
         setToastMessage(message);
+        setToastType(type);
 
         window.setTimeout(() => {
             setToastMessage("");
         }, 3500);
+    };
+
+    const scrollToExpenseForm = () => {
+        window.setTimeout(() => {
+            formSectionRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+
+            window.setTimeout(() => {
+                titleInputRef.current?.focus();
+            }, 500);
+        }, 80);
     };
 
 
@@ -461,10 +490,7 @@ export default function Expenses() {
 
         setShowForm(true);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        scrollToExpenseForm();
     };
 
 
@@ -492,10 +518,7 @@ export default function Expenses() {
 
         setShowForm(true);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        scrollToExpenseForm();
     };
 
 
@@ -587,8 +610,9 @@ export default function Expenses() {
                     formData
                 );
 
-                showSuccessToast(
-                    "Expense added successfully."
+                showToast(
+                    "Expense added successfully.",
+                    "success"
                 );
             }
 
@@ -614,23 +638,33 @@ export default function Expenses() {
        DELETE
     ===================================================== */
 
-    const handleDelete = async (id) => {
-        const confirmed =
-            window.confirm(
-                "Are you sure you want to delete this expense?"
-            );
+    const handleDelete = (id) => {
+        setSelectedExpenseId(id);
+        setDeleteDialogOpen(true);
+    };
 
-        if (!confirmed) {
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setSelectedExpenseId(null);
+    };
+
+    const confirmDelete = async () => {
+        if (!selectedExpenseId) {
             return;
         }
 
         try {
-            await deleteExpense(id);
+            await deleteExpense(
+                selectedExpenseId
+            );
 
             await fetchExpenses();
 
-            alert(
-                "Expense deleted successfully."
+            closeDeleteDialog();
+
+            showToast(
+                "Expense deleted successfully.",
+                "success"
             );
         } catch (error) {
             console.error(
@@ -638,8 +672,11 @@ export default function Expenses() {
                 error.response?.data || error
             );
 
-            alert(
-                getErrorMessage(error)
+            closeDeleteDialog();
+
+            showToast(
+                getErrorMessage(error),
+                "error"
             );
         }
     };
@@ -783,6 +820,7 @@ export default function Expenses() {
                 <div
                     role="status"
                     aria-live="polite"
+                    className="bb-expense-toast"
                     style={{
                         position: "fixed",
                         right: "24px",
@@ -793,11 +831,21 @@ export default function Expenses() {
                         gap: "10px",
                         maxWidth: "calc(100vw - 48px)",
                         padding: "13px 16px",
-                        border: "1px solid rgba(52,211,153,.28)",
+                        border:
+                            toastType === "error"
+                                ? "1px solid rgba(242,122,127,.30)"
+                                : "1px solid rgba(52,211,153,.28)",
                         borderRadius: "12px",
-                        background: "#10261F",
-                        boxShadow: "0 16px 40px rgba(0,0,0,.28)",
-                        color: "#D1FAE5",
+                        background:
+                            toastType === "error"
+                                ? "#2A171A"
+                                : "#10261F",
+                        boxShadow:
+                            "0 16px 40px rgba(0,0,0,.28)",
+                        color:
+                            toastType === "error"
+                                ? "#FECACA"
+                                : "#D1FAE5",
                         fontSize: "12px",
                         fontWeight: 700,
                     }}
@@ -809,16 +857,25 @@ export default function Expenses() {
                             height: "20px",
                             display: "grid",
                             placeItems: "center",
+                            flexShrink: 0,
                             borderRadius: "50%",
-                            background: "#10B981",
-                            color: "#052E24",
+                            background:
+                                toastType === "error"
+                                    ? "#EF4444"
+                                    : "#10B981",
+                            color:
+                                toastType === "error"
+                                    ? "#FFF1F2"
+                                    : "#052E24",
                             fontSize: "13px",
                             fontWeight: 900,
                         }}
                     >
-                        ✓
+                        {toastType === "error" ? "!" : "✓"}
                     </span>
-                    {toastMessage}
+                    <span style={{ whiteSpace: "pre-line" }}>
+                        {toastMessage}
+                    </span>
                 </div>
             )}
 
@@ -1067,8 +1124,10 @@ export default function Expenses() {
 
             {showForm && (
                 <section
+                    ref={formSectionRef}
                     className="bb-expense-form"
                     style={{
+                        scrollMarginTop: "24px",
                         marginBottom: "26px",
                         padding: "25px",
                         borderRadius: "17px",
@@ -1167,6 +1226,7 @@ export default function Expenses() {
                                 required
                             >
                                 <input
+                                    ref={titleInputRef}
                                     type="text"
                                     name="title"
                                     placeholder="e.g. Grocery shopping"
@@ -2553,6 +2613,160 @@ export default function Expenses() {
             </section>
 
 
+            {deleteDialogOpen && (
+                <div
+                    role="presentation"
+                    onMouseDown={(event) => {
+                        if (
+                            event.target ===
+                            event.currentTarget
+                        ) {
+                            closeDeleteDialog();
+                        }
+                    }}
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 2000,
+                        display: "grid",
+                        placeItems: "center",
+                        padding: "24px",
+                        background:
+                            "rgba(3,7,12,.68)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                    }}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="bb-delete-expense-title"
+                        aria-describedby="bb-delete-expense-description"
+                        style={{
+                            width: "100%",
+                            maxWidth: "430px",
+                            padding: "25px",
+                            boxSizing: "border-box",
+                            border:
+                                "1px solid rgba(148,163,184,.16)",
+                            borderRadius: "18px",
+                            background:
+                                "linear-gradient(145deg,#111A25,#0D141D)",
+                            boxShadow:
+                                "0 24px 70px rgba(0,0,0,.42)",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "46px",
+                                height: "46px",
+                                display: "grid",
+                                placeItems: "center",
+                                marginBottom: "17px",
+                                borderRadius: "13px",
+                                color: COLORS.red,
+                                background:
+                                    "rgba(242,122,127,.09)",
+                                border:
+                                    "1px solid rgba(242,122,127,.16)",
+                            }}
+                        >
+                            <Trash2 size={19} />
+                        </div>
+
+                        <h3
+                            id="bb-delete-expense-title"
+                            style={{
+                                margin: 0,
+                                color: COLORS.text,
+                                fontSize: "18px",
+                                lineHeight: 1.3,
+                                fontWeight: 800,
+                                letterSpacing: "-.25px",
+                            }}
+                        >
+                            Delete this expense?
+                        </h3>
+
+                        <p
+                            id="bb-delete-expense-description"
+                            style={{
+                                margin: "8px 0 0",
+                                color: COLORS.textMuted,
+                                fontSize: "12px",
+                                lineHeight: 1.6,
+                                fontWeight: 500,
+                            }}
+                        >
+                            This transaction will be permanently
+                            removed from your expense history.
+                        </p>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: "9px",
+                                marginTop: "23px",
+                                paddingTop: "17px",
+                                borderTop:
+                                    "1px solid rgba(148,163,184,.08)",
+                            }}
+                        >
+                            <button
+                                type="button"
+                                onClick={closeDeleteDialog}
+                                style={{
+                                    height: "40px",
+                                    padding: "0 16px",
+                                    border:
+                                        "1px solid rgba(148,163,184,.14)",
+                                    borderRadius: "9px",
+                                    background:
+                                        "rgba(255,255,255,.025)",
+                                    color:
+                                        COLORS.textSecondary,
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "12px",
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                style={{
+                                    height: "40px",
+                                    padding: "0 16px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "7px",
+                                    border:
+                                        "1px solid rgba(242,122,127,.24)",
+                                    borderRadius: "9px",
+                                    background:
+                                        "linear-gradient(135deg,#D85F68,#B74750)",
+                                    color: "#FFF5F5",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "12px",
+                                    fontWeight: 800,
+                                    boxShadow:
+                                        "0 8px 22px rgba(242,122,127,.12)",
+                                }}
+                            >
+                                <Trash2 size={14} />
+                                Delete Expense
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* =================================================
                 RESPONSIVE STYLES
             ================================================= */}
@@ -2638,6 +2852,21 @@ export default function Expenses() {
 
                         .bb-expense-hero button {
                             width: 100%;
+                        }
+                    }
+
+                    @media (prefers-color-scheme: light) {
+                        .bb-expenses-page .bb-expense-toast {
+                            box-shadow: 0 16px 40px rgba(15,23,42,.16) !important;
+                        }
+
+                        .bb-expenses-page [role="dialog"] {
+                            background:
+                                linear-gradient(145deg,#FFFFFF,#F7F8FA) !important;
+                            border-color:
+                                rgba(15,23,42,.10) !important;
+                            box-shadow:
+                                0 24px 70px rgba(15,23,42,.18) !important;
                         }
                     }
 

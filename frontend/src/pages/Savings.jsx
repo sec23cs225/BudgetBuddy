@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
     PiggyBank,
@@ -1332,7 +1332,7 @@ function GoalCard({
                     <button
                         type="button"
                         onClick={() =>
-                            onDelete(goal.id)
+                            onDelete(goal)
                         }
                         title="Delete goal"
                         style={{
@@ -1866,6 +1866,15 @@ export default function Savings() {
     const [toast, setToast] =
         useState(null);
 
+    const [deleteDialogOpen, setDeleteDialogOpen] =
+        useState(false);
+
+    const [selectedGoal, setSelectedGoal] =
+        useState(null);
+
+    const formSectionRef = useRef(null);
+    const goalNameInputRef = useRef(null);
+
 
     /* =====================================================
        TOAST
@@ -1895,6 +1904,20 @@ export default function Savings() {
         return () =>
             window.clearTimeout(timer);
     }, [toast]);
+
+
+    const scrollToSavingsForm = () => {
+        window.setTimeout(() => {
+            formSectionRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+
+            window.setTimeout(() => {
+                goalNameInputRef.current?.focus();
+            }, 500);
+        }, 80);
+    };
 
 
     /* =====================================================
@@ -1975,10 +1998,7 @@ export default function Savings() {
 
         setShowForm(true);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        scrollToSavingsForm();
     };
 
 
@@ -2005,10 +2025,7 @@ export default function Savings() {
 
         setShowForm(true);
 
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        scrollToSavingsForm();
     };
 
 
@@ -2198,22 +2215,29 @@ export default function Savings() {
        DELETE
     ===================================================== */
 
-    const handleDelete = async (
-        id
-    ) => {
-        const confirmed =
-            window.confirm(
-                "Are you sure you want to delete this savings goal?"
-            );
+    const handleDelete = (goal) => {
+        setSelectedGoal(goal);
+        setDeleteDialogOpen(true);
+    };
 
-        if (!confirmed) {
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setSelectedGoal(null);
+    };
+
+    const confirmDelete = async () => {
+        if (!selectedGoal) {
             return;
         }
 
         try {
-            await deleteSavingsGoal(id);
+            await deleteSavingsGoal(
+                selectedGoal.id
+            );
 
             await fetchGoals();
+
+            closeDeleteDialog();
 
             showToast(
                 "Savings goal deleted",
@@ -2225,6 +2249,8 @@ export default function Savings() {
                 error.response?.data ||
                     error.message
             );
+
+            closeDeleteDialog();
 
             showToast(
                 "Unable to delete goal",
@@ -3073,8 +3099,10 @@ export default function Savings() {
 
             {showForm && (
                 <section
+                    ref={formSectionRef}
                     className="bb-savings-page-padding"
                     style={{
+                        scrollMarginTop: "24px",
                         marginBottom:
                             "27px",
                         padding: "23px",
@@ -3180,6 +3208,7 @@ export default function Savings() {
                         >
                             <Field label="GOAL NAME">
                                 <input
+                                    ref={goalNameInputRef}
                                     className="bb-savings-input"
                                     type="text"
                                     name="goal_name"
@@ -3781,6 +3810,220 @@ export default function Savings() {
                     </div>
                 )}
             </section>
+
+
+            {/* =================================================
+                DELETE CONFIRMATION
+            ================================================= */}
+
+            {deleteDialogOpen && (
+                <div
+                    role="presentation"
+                    onMouseDown={(event) => {
+                        if (
+                            event.target ===
+                            event.currentTarget
+                        ) {
+                            closeDeleteDialog();
+                        }
+                    }}
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 3200,
+                        display: "grid",
+                        placeItems: "center",
+                        padding: "24px",
+                        background:
+                            "rgba(2,6,12,.72)",
+                        backdropFilter:
+                            "blur(9px)",
+                        WebkitBackdropFilter:
+                            "blur(9px)",
+                    }}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="bb-delete-goal-title"
+                        aria-describedby="bb-delete-goal-description"
+                        style={{
+                            width: "min(430px,100%)",
+                            padding: "26px",
+                            boxSizing: "border-box",
+                            borderRadius: "19px",
+                            background:
+                                "linear-gradient(145deg,#111923,#0B1219)",
+                            border:
+                                "1px solid rgba(255,255,255,.09)",
+                            boxShadow:
+                                "0 30px 90px rgba(0,0,0,.55)",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "46px",
+                                height: "46px",
+                                display: "grid",
+                                placeItems: "center",
+                                marginBottom: "17px",
+                                borderRadius: "13px",
+                                color: "#FF747C",
+                                background:
+                                    "rgba(255,116,124,.08)",
+                                border:
+                                    "1px solid rgba(255,116,124,.16)",
+                            }}
+                        >
+                            <Trash2 size={19} />
+                        </div>
+
+                        <h2
+                            id="bb-delete-goal-title"
+                            style={{
+                                margin: 0,
+                                color: "#F5F8F7",
+                                fontSize: "19px",
+                                lineHeight: 1.25,
+                                fontWeight: 850,
+                                letterSpacing: "-.3px",
+                            }}
+                        >
+                            Delete this savings goal?
+                        </h2>
+
+                        <p
+                            id="bb-delete-goal-description"
+                            style={{
+                                margin:
+                                    "9px 0 0",
+                                color: "#899792",
+                                fontSize: "12px",
+                                lineHeight: 1.6,
+                            }}
+                        >
+                            {selectedGoal?.goal_name
+                                ? `"${selectedGoal.goal_name}" will be permanently removed from your savings portfolio.`
+                                : "This savings goal will be permanently removed from your savings portfolio."}
+                        </p>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent:
+                                    "flex-end",
+                                gap: "9px",
+                                marginTop: "23px",
+                                paddingTop: "17px",
+                                borderTop:
+                                    "1px solid rgba(255,255,255,.07)",
+                            }}
+                        >
+                            <button
+                                type="button"
+                                onClick={
+                                    closeDeleteDialog
+                                }
+                                style={{
+                                    height: "41px",
+                                    padding:
+                                        "0 16px",
+                                    border:
+                                        "1px solid rgba(255,255,255,.09)",
+                                    borderRadius:
+                                        "10px",
+                                    background:
+                                        "rgba(255,255,255,.025)",
+                                    color: "#9AA6A2",
+                                    cursor: "pointer",
+                                    fontFamily:
+                                        "inherit",
+                                    fontSize:
+                                        "12px",
+                                    fontWeight:
+                                        700,
+                                }}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={
+                                    confirmDelete
+                                }
+                                style={{
+                                    height: "41px",
+                                    padding:
+                                        "0 16px",
+                                    display:
+                                        "flex",
+                                    alignItems:
+                                        "center",
+                                    justifyContent:
+                                        "center",
+                                    gap: "7px",
+                                    border:
+                                        "1px solid rgba(255,116,124,.22)",
+                                    borderRadius:
+                                        "10px",
+                                    background:
+                                        "linear-gradient(135deg,#D85F68,#B74750)",
+                                    color:
+                                        "#FFF5F5",
+                                    cursor:
+                                        "pointer",
+                                    fontFamily:
+                                        "inherit",
+                                    fontSize:
+                                        "12px",
+                                    fontWeight:
+                                        850,
+                                    boxShadow:
+                                        "0 9px 25px rgba(255,116,124,.12)",
+                                }}
+                            >
+                                <Trash2 size={14} />
+                                Delete Goal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+            {/* =================================================
+                LIGHT THEME SUPPORT FOR NEW SURFACES
+            ================================================= */}
+
+            <style>
+                {`
+                    @media (prefers-color-scheme: light) {
+                        [role="dialog"] {
+                            background:
+                                linear-gradient(145deg,#FFFFFF,#F7F9FA) !important;
+                            border-color:
+                                rgba(15,23,42,.10) !important;
+                            box-shadow:
+                                0 30px 90px rgba(15,23,42,.20) !important;
+                        }
+
+                        [role="dialog"] h2 {
+                            color: #172033 !important;
+                        }
+
+                        [role="dialog"] p {
+                            color: #64748B !important;
+                        }
+
+                        [role="dialog"] button[type="button"]:first-of-type {
+                            background: #F8FAFC !important;
+                            border-color: rgba(15,23,42,.10) !important;
+                            color: #475569 !important;
+                        }
+                    }
+                `}
+            </style>
         </main>
     );
 }

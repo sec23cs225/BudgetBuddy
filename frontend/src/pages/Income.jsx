@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
     Wallet,
@@ -584,6 +584,46 @@ export default function Income() {
     const [refreshing, setRefreshing] =
         useState(false);
 
+    const [toastMessage, setToastMessage] =
+        useState("");
+
+    const [toastType, setToastType] =
+        useState("success");
+
+    const [deleteDialogOpen, setDeleteDialogOpen] =
+        useState(false);
+
+    const [selectedIncome, setSelectedIncome] =
+        useState(null);
+
+    const formSectionRef = useRef(null);
+    const titleInputRef = useRef(null);
+
+    const showToast = (
+        message,
+        type = "success"
+    ) => {
+        setToastMessage(message);
+        setToastType(type);
+
+        window.setTimeout(() => {
+            setToastMessage("");
+        }, 3500);
+    };
+
+    const scrollToIncomeForm = () => {
+        window.setTimeout(() => {
+            formSectionRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+
+            window.setTimeout(() => {
+                titleInputRef.current?.focus();
+            }, 500);
+        }, 80);
+    };
+
 
     /* =========================================================
        FETCH
@@ -1038,6 +1078,8 @@ export default function Income() {
         });
 
         setFormOpen(true);
+
+        scrollToIncomeForm();
     };
 
 
@@ -1065,6 +1107,8 @@ export default function Income() {
         });
 
         setFormOpen(true);
+
+        scrollToIncomeForm();
     };
 
 
@@ -1140,6 +1184,13 @@ export default function Income() {
 
             closeForm();
 
+            showToast(
+                editingIncome
+                    ? "Income updated successfully."
+                    : "Income added successfully.",
+                "success"
+            );
+
             await loadIncomes();
 
         } catch (err) {
@@ -1167,38 +1218,48 @@ export default function Income() {
        DELETE
     ========================================================= */
 
-    const handleDelete = async (
-        income
-    ) => {
+    const handleDelete = (income) => {
+        setSelectedIncome(income);
+        setDeleteDialogOpen(true);
+    };
 
-        const confirmed =
-            window.confirm(
-                `Delete "${income.title}"?`
-            );
+    const closeDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setSelectedIncome(null);
+    };
 
-        if (!confirmed) {
+    const confirmDelete = async () => {
+        if (!selectedIncome) {
             return;
         }
 
         try {
-
             setError("");
 
             await deleteIncome(
-                income.id
+                selectedIncome.id
             );
 
             await loadIncomes();
 
-        } catch (err) {
+            closeDeleteDialog();
 
+            showToast(
+                "Income deleted successfully.",
+                "success"
+            );
+
+        } catch (err) {
             console.error(
                 "Income delete error:",
                 err
             );
 
-            setError(
-                "Unable to delete this income entry."
+            closeDeleteDialog();
+
+            showToast(
+                "Unable to delete this income entry.",
+                "error"
             );
         }
     };
@@ -2504,7 +2565,11 @@ export default function Income() {
 
                 {formOpen && (
 
-                    <section className="bb-income-card bb-income-form">
+                    <section
+                        ref={formSectionRef}
+                        className="bb-income-card bb-income-form"
+                        style={{ scrollMarginTop: "24px" }}
+                    >
 
                         <div className="bb-income-form-header">
 
@@ -2546,6 +2611,7 @@ export default function Income() {
                                 <Field label="Title">
 
                                     <input
+                                        ref={titleInputRef}
                                         name="title"
                                         type="text"
                                         value={
@@ -2973,6 +3039,252 @@ export default function Income() {
                 </section>
 
             </div>
+
+            {toastMessage && (
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="bb-income-toast"
+                    style={{
+                        position: "fixed",
+                        right: "24px",
+                        bottom: "24px",
+                        zIndex: 1000,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        maxWidth: "calc(100vw - 48px)",
+                        padding: "13px 16px",
+                        border:
+                            toastType === "error"
+                                ? "1px solid rgba(242,122,127,.30)"
+                                : "1px solid rgba(0,217,166,.28)",
+                        borderRadius: "12px",
+                        background:
+                            toastType === "error"
+                                ? "#2A171A"
+                                : "#10261F",
+                        boxShadow:
+                            "0 16px 40px rgba(0,0,0,.28)",
+                        color:
+                            toastType === "error"
+                                ? "#FECACA"
+                                : "#D1FAE5",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                    }}
+                >
+                    <span
+                        aria-hidden="true"
+                        style={{
+                            width: "20px",
+                            height: "20px",
+                            display: "grid",
+                            placeItems: "center",
+                            flexShrink: 0,
+                            borderRadius: "50%",
+                            background:
+                                toastType === "error"
+                                    ? "#EF4444"
+                                    : "#10B981",
+                            color: "#FFFFFF",
+                            fontSize: "13px",
+                            fontWeight: 900,
+                        }}
+                    >
+                        {toastType === "error" ? "!" : "✓"}
+                    </span>
+
+                    <span>
+                        {toastMessage}
+                    </span>
+                </div>
+            )}
+
+            {deleteDialogOpen && (
+                <div
+                    role="presentation"
+                    onMouseDown={(event) => {
+                        if (
+                            event.target ===
+                            event.currentTarget
+                        ) {
+                            closeDeleteDialog();
+                        }
+                    }}
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 2000,
+                        display: "grid",
+                        placeItems: "center",
+                        padding: "24px",
+                        background:
+                            "rgba(3,7,12,.68)",
+                        backdropFilter: "blur(8px)",
+                        WebkitBackdropFilter: "blur(8px)",
+                    }}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="bb-delete-income-title"
+                        aria-describedby="bb-delete-income-description"
+                        style={{
+                            width: "100%",
+                            maxWidth: "430px",
+                            padding: "25px",
+                            boxSizing: "border-box",
+                            border:
+                                "1px solid rgba(148,163,184,.16)",
+                            borderRadius: "18px",
+                            background:
+                                "linear-gradient(145deg,#111A25,#0D141D)",
+                            boxShadow:
+                                "0 24px 70px rgba(0,0,0,.42)",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "46px",
+                                height: "46px",
+                                display: "grid",
+                                placeItems: "center",
+                                marginBottom: "17px",
+                                borderRadius: "13px",
+                                color: "#F27A7F",
+                                background:
+                                    "rgba(242,122,127,.09)",
+                                border:
+                                    "1px solid rgba(242,122,127,.16)",
+                            }}
+                        >
+                            <Trash2 size={19} />
+                        </div>
+
+                        <h3
+                            id="bb-delete-income-title"
+                            style={{
+                                margin: 0,
+                                color: "#F4F7FA",
+                                fontSize: "18px",
+                                lineHeight: 1.3,
+                                fontWeight: 800,
+                                letterSpacing: "-.25px",
+                            }}
+                        >
+                            Delete this income?
+                        </h3>
+
+                        <p
+                            id="bb-delete-income-description"
+                            style={{
+                                margin: "8px 0 0",
+                                color: "#7D8B9D",
+                                fontSize: "12px",
+                                lineHeight: 1.6,
+                                fontWeight: 500,
+                            }}
+                        >
+                            {selectedIncome?.title
+                                ? `"${selectedIncome.title}" will be permanently removed from your income history.`
+                                : "This income entry will be permanently removed from your income history."}
+                        </p>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                gap: "9px",
+                                marginTop: "23px",
+                                paddingTop: "17px",
+                                borderTop:
+                                    "1px solid rgba(148,163,184,.08)",
+                            }}
+                        >
+                            <button
+                                type="button"
+                                onClick={closeDeleteDialog}
+                                style={{
+                                    height: "40px",
+                                    padding: "0 16px",
+                                    border:
+                                        "1px solid rgba(148,163,184,.14)",
+                                    borderRadius: "9px",
+                                    background:
+                                        "rgba(255,255,255,.025)",
+                                    color: "#AAB7C7",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "12px",
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                style={{
+                                    height: "40px",
+                                    padding: "0 16px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "7px",
+                                    border:
+                                        "1px solid rgba(242,122,127,.24)",
+                                    borderRadius: "9px",
+                                    background:
+                                        "linear-gradient(135deg,#D85F68,#B74750)",
+                                    color: "#FFF5F5",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    fontSize: "12px",
+                                    fontWeight: 800,
+                                    boxShadow:
+                                        "0 8px 22px rgba(242,122,127,.12)",
+                                }}
+                            >
+                                <Trash2 size={14} />
+                                Delete Income
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                .bb-income-refresh-spin {
+                    animation: bb-income-spin .8s linear infinite;
+                }
+
+                @keyframes bb-income-spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                @media (prefers-color-scheme: light) {
+                    .bb-income-page {
+                        color: #172033;
+                        background: #F5F7FA;
+                    }
+
+                    .bb-income-page .bb-income-toast {
+                        box-shadow: 0 16px 40px rgba(15,23,42,.16) !important;
+                    }
+
+                    .bb-income-page [role="dialog"] {
+                        background:
+                            linear-gradient(145deg,#FFFFFF,#F7F8FA) !important;
+                        border-color:
+                            rgba(15,23,42,.10) !important;
+                        box-shadow:
+                            0 24px 70px rgba(15,23,42,.18) !important;
+                    }
+                }
+            `}</style>
 
         </main>
     );

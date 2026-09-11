@@ -1,4 +1,5 @@
 import { useState } from "react";
+import api from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 
@@ -122,16 +123,31 @@ export default function Login() {
 
 
             /*
-             * Confirm that Django returned a successful
-             * authentication response.
+             * Django returns 200 and sets the HttpOnly JWT cookies.
+             * The tokens are intentionally not returned to JavaScript.
+             *
+             * Verify the newly-created cookie session through /me/
+             * before navigating to the protected dashboard.
              */
-
-            if (
-                response?.status !== 200 ||
-                !response?.data
-            ) {
+            if (response?.status !== 200) {
                 throw new Error(
                     "Login was not completed successfully."
+                );
+            }
+
+            const sessionResponse = await api.get(
+                "/me/",
+                {
+                    withCredentials: true,
+                }
+            );
+
+            if (
+                sessionResponse?.status !== 200 ||
+                !sessionResponse?.data?.authenticated
+            ) {
+                throw new Error(
+                    "Login succeeded, but the authentication session could not be verified."
                 );
             }
 
@@ -383,15 +399,29 @@ export default function Login() {
 
 
             /*
-             * Confirm successful authentication.
+             * Django sets the BudgetBuddy JWTs in HttpOnly cookies.
+             * Verify that the browser can use the new session before
+             * entering the protected dashboard.
              */
-
-            if (
-                response?.status !== 200 ||
-                !response?.data
-            ) {
+            if (response?.status !== 200) {
                 throw new Error(
                     "Google login was not completed successfully."
+                );
+            }
+
+            const sessionResponse = await api.get(
+                "/me/",
+                {
+                    withCredentials: true,
+                }
+            );
+
+            if (
+                sessionResponse?.status !== 200 ||
+                !sessionResponse?.data?.authenticated
+            ) {
+                throw new Error(
+                    "Google login succeeded, but the authentication session could not be verified."
                 );
             }
 
