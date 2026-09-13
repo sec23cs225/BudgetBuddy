@@ -425,7 +425,7 @@ def google_login(request):
     # INVALID GOOGLE TOKEN
     # --------------------------------------------------------
 
-    except ValueError as error:
+    except (ValueError, Exception) as error:
 
         print(
             "GOOGLE TOKEN VERIFICATION ERROR:",

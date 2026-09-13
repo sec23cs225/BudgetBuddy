@@ -19,6 +19,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ============================================================
+# LOAD ENVIRONMENT VARIABLES (.ENV)
+# ============================================================
+
+for _env_candidate in [BASE_DIR / ".env", BASE_DIR / "backend" / ".env", BASE_DIR.parent / ".env"]:
+    if _env_candidate.is_file():
+        try:
+            with open(_env_candidate, encoding="utf-8") as _env_file:
+                for _line in _env_file:
+                    _line = _line.strip()
+                    if _line and not _line.startswith("#") and "=" in _line:
+                        _k, _v = _line.split("=", 1)
+                        _k = _k.strip()
+                        _v = _v.strip()
+                        if len(_v) >= 2 and (
+                            (_v[0] == '"' and _v[-1] == '"')
+                            or (_v[0] == "'" and _v[-1] == "'")
+                        ):
+                            _v = _v[1:-1]
+                        os.environ.setdefault(_k, _v)
+        except Exception:
+            pass
+        break
+
+
+
+# ============================================================
 # SECURITY
 # ============================================================
 

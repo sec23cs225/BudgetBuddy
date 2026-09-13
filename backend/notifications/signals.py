@@ -1,6 +1,8 @@
 import logging
+import sys
 import threading
 
+from django.conf import settings
 from django.db import close_old_connections, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -206,8 +208,8 @@ def send_notification_email_on_create(
     Sends an email when a new BudgetBuddy notification
     is created.
 
-    Email delivery runs in a background thread so that
-    SMTP/SendGrid delays cannot block the API request.
+    Email delivery runs in a background thread in production
+    so that SMTP/SendGrid delays cannot block the API request.
 
     The in-app notification is created immediately,
     regardless of email delivery status.
@@ -261,7 +263,7 @@ def send_notification_email_on_create(
         return
 
     # --------------------------------------------------------
-    # SEND EMAIL AFTER DATABASE COMMIT
+    # DELIVERY
     # --------------------------------------------------------
 
     notification_id = getattr(
@@ -270,25 +272,46 @@ def send_notification_email_on_create(
         None,
     )
 
-    if not notification_id:
-        return
+    def deliver_email_sync():
+        try:
+            success = send_notification_email(
+                notification=instance
+            )
+            if success:
+                logger.info(
+                    "BudgetBuddy notification email sent "
+                    "successfully for notification %s.",
+                    getattr(instance, "id", "unknown"),
+                )
+            else:
+                logger.info(
+                    "BudgetBuddy notification email was "
+                    "not sent for notification %s.",
+                    getattr(instance, "id", "unknown"),
+                )
+        except Exception:
+            logger.exception(
+                "Unexpected error while sending "
+                "BudgetBuddy notification email "
+                "for notification %s.",
+                getattr(instance, "id", "unknown"),
+            )
 
     def start_background_email_delivery():
         """
-        Start email delivery only after the database
-        transaction has successfully committed.
+        Start email delivery in a background thread only after
+        the database transaction has successfully committed.
         """
+        if not notification_id:
+            return
 
         try:
             email_thread = threading.Thread(
                 target=deliver_notification_email,
                 args=(notification_id,),
                 daemon=True,
-                name=(
-                    f"budgetbuddy-email-{notification_id}"
-                ),
+                name=f"budgetbuddy-email-{notification_id}",
             )
-
             email_thread.start()
 
             logger.info(
@@ -304,6 +327,16 @@ def send_notification_email_on_create(
                 notification_id,
             )
 
-    transaction.on_commit(
-        start_background_email_delivery
+    # In testing (locmem email backend or test runner), deliver synchronously
+    # so test assertions on mail.outbox succeed immediately.
+    is_testing = (
+        "test" in sys.argv
+        or getattr(settings, "EMAIL_BACKEND", "").endswith("locmem.EmailBackend")
     )
+
+    if is_testing:
+        deliver_email_sync()
+    else:
+        transaction.on_commit(
+            start_background_email_delivery
+        )

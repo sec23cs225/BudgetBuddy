@@ -19,6 +19,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ============================================================
+# LOAD ENVIRONMENT VARIABLES (.ENV)
+# ============================================================
+
+for _env_candidate in [BASE_DIR / ".env", BASE_DIR.parent / ".env"]:
+    if _env_candidate.is_file():
+        try:
+            with open(_env_candidate, encoding="utf-8") as _env_file:
+                for _line in _env_file:
+                    _line = _line.strip()
+                    if _line and not _line.startswith("#") and "=" in _line:
+                        _k, _v = _line.split("=", 1)
+                        _k = _k.strip()
+                        _v = _v.strip()
+                        if len(_v) >= 2 and (
+                            (_v[0] == '"' and _v[-1] == '"')
+                            or (_v[0] == "'" and _v[-1] == "'")
+                        ):
+                            _v = _v[1:-1]
+                        os.environ.setdefault(_k, _v)
+        except Exception:
+            pass
+        break
+
+
+
+# ============================================================
 # SECURITY
 # ============================================================
 
@@ -431,4 +457,28 @@ DEFAULT_FROM_EMAIL = os.getenv(
 DEFAULT_AUTO_FIELD = (
     "django.db.models.BigAutoField"
 )
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
+
 

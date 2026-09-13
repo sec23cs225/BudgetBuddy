@@ -175,6 +175,17 @@ Your personal finance companion
                         ">
 
                             <div style="
+                                font-size: 11px;
+                                font-weight: 800;
+                                letter-spacing: 1.5px;
+                                text-transform: uppercase;
+                                color: #a7f3d0;
+                                margin-bottom: 6px;
+                            ">
+                                BUDGETBUDDY
+                            </div>
+
+                            <div style="
                                 font-size: 22px;
                                 font-weight: 700;
                                 letter-spacing: -0.3px;
@@ -185,13 +196,14 @@ Your personal finance companion
                             <div style="
                                 margin-top: 6px;
                                 font-size: 13px;
-                                color: #a7f3d0;
+                                color: #9ca3af;
                             ">
                                 Your personal finance companion
                             </div>
 
                         </td>
                     </tr>
+
 
 
                     <!-- Content -->

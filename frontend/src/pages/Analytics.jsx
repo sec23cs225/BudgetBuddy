@@ -779,22 +779,6 @@ export default function Analytics() {
             isRefresh = false
         ) => {
 
-            const accessToken =
-                localStorage.getItem(
-                    "access"
-                );
-
-            if (!accessToken) {
-
-                setError(
-                    "Your session has expired. Please sign in again."
-                );
-
-                setLoading(false);
-
-                return;
-            }
-
             try {
 
                 if (isRefresh) {

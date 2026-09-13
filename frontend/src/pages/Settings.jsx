@@ -28,6 +28,8 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import EmailPreferences from "../components/common/EmailPreferences";
+
 
 /* =========================================================
    STORAGE HELPERS
@@ -1379,8 +1381,16 @@ export default function Settings() {
 
 
                     {/* =================================================
+                        EMAIL NOTIFICATION INTELLIGENCE
+                    ================================================= */}
+
+                    <EmailPreferences />
+
+
+                    {/* =================================================
                         APPEARANCE
                     ================================================= */}
+
 
                     <SettingsCard>
 

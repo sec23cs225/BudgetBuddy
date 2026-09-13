@@ -45,6 +45,9 @@ import {
     clearNotifications,
 } from "../services/notificationService";
 
+import EmailPreferences from "../components/common/EmailPreferences";
+
+
 
 /* =========================================================
    CONFIGURATION
@@ -2290,8 +2293,22 @@ export default function Notification() {
 
 
             {/* =================================================
+                EMAIL NOTIFICATION INTELLIGENCE & PREFERENCES
+            ================================================= */}
+
+            <Box
+                sx={{
+                    mt: 4,
+                }}
+            >
+                <EmailPreferences />
+            </Box>
+
+
+            {/* =================================================
                 FEEDBACK
             ================================================= */}
+
 
             <Snackbar
                 open={

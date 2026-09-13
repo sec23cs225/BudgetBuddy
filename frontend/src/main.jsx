@@ -11,7 +11,8 @@ import "./styles/layout.css";
 
 
 const googleClientId =
-    import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    "80403932882-qalfvjgvhc6o850ae2go693lu9k95arq.apps.googleusercontent.com";
 
 
 if (!googleClientId) {

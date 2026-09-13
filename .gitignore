@@ -1,2 +1,6 @@
-
 frontend/.env
+backend/.env
+.env
+__pycache__/
+*.py[cod]
+*.pyo

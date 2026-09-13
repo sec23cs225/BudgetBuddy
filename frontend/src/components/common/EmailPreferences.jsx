@@ -20,7 +20,8 @@ import {
     getEmailPreferences,
     updateEmailPreferences,
     sendTestEmail,
-} from "../services/notificationEmailService";
+} from "../../services/notificationEmailService";
+
 
 
 const DEFAULT_PREFERENCES = {

@@ -1,67 +1,31 @@
-import axios from "axios";
+import api from "./api";
 
 
-const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL ||
-    "http://127.0.0.1:8000/api";
-
-
-const emailAPI =
-    axios.create({
-        baseURL:
-            `${API_BASE_URL}/notifications/email`,
-        headers: {
-            "Content-Type":
-                "application/json",
-        },
-    });
-
-
-emailAPI.interceptors.request.use(
-    (config) => {
-
-        const token =
-            localStorage.getItem(
-                "access_token"
-            ) ||
-            localStorage.getItem(
-                "access"
-            );
-
-        if (token) {
-
-            config.headers.Authorization =
-                `Bearer ${token}`;
-
-        }
-
-        return config;
-    }
-);
-
+/* =========================================================
+   GET EMAIL NOTIFICATION PREFERENCES
+========================================================= */
 
 export function getEmailPreferences() {
-
-    return emailAPI.get(
-        "/preferences/"
-    );
+    return api.get("/notifications/email/preferences/");
 }
 
 
-export function updateEmailPreferences(
-    preferences
-) {
+/* =========================================================
+   UPDATE EMAIL NOTIFICATION PREFERENCES
+========================================================= */
 
-    return emailAPI.patch(
-        "/preferences/",
+export function updateEmailPreferences(preferences) {
+    return api.patch(
+        "/notifications/email/preferences/",
         preferences
     );
 }
 
 
-export function sendTestEmail() {
+/* =========================================================
+   SEND TEST EMAIL NOTIFICATION
+========================================================= */
 
-    return emailAPI.post(
-        "/test/"
-    );
-}
+export function sendTestEmail() {
+    return api.post("/notifications/email/test/");
+}
