@@ -395,14 +395,14 @@ AUTH_COOKIE_HTTP_ONLY = (
 AUTH_COOKIE_SECURE = (
     os.getenv(
         "AUTH_COOKIE_SECURE",
-        "False",
+        "False" if DEBUG else "True",
     ).lower()
     == "true"
 )
 
 AUTH_COOKIE_SAMESITE = os.getenv(
     "AUTH_COOKIE_SAMESITE",
-    "Lax",
+    "Lax" if DEBUG else "None",
 )
 
 
