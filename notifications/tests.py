@@ -375,3 +375,26 @@ class NotificationEmailTests(TestCase):
             response.status_code,
             [401, 403],
         )
+
+    def test_notification_title_with_newlines_is_sanitized_against_header_injection(self):
+
+        Notification.objects.create(
+            user=self.user,
+            title="Critical Alert\nBcc: evil@attacker.com\r\nSubject: Injected",
+            message="Testing CRLF header injection protection.",
+            notification_type="System",
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            1,
+        )
+
+        email = mail.outbox[0]
+        self.assertNotIn("\n", email.subject)
+        self.assertNotIn("\r", email.subject)
+        self.assertEqual(
+            email.subject,
+            "BudgetBuddy | Critical Alert Bcc: evil@attacker.com Subject: Injected",
+        )
+

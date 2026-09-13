@@ -325,10 +325,11 @@ def send_notification_email(notification):
         _build_email_content(notification)
     )
 
-    subject = (
-        f"BudgetBuddy | "
-        f"{notification.title}"
+    clean_title = " ".join(
+        (getattr(notification, "title", "") or "BudgetBuddy Notification").split()
     )
+
+    subject = f"BudgetBuddy | {clean_title}"
 
     email = EmailMultiAlternatives(
         subject=subject,
