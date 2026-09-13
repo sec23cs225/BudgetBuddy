@@ -29,6 +29,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import EmailPreferences from "../components/common/EmailPreferences";
+import api from "../services/api";
 
 
 /* =========================================================
@@ -637,6 +638,25 @@ export default function Settings() {
     );
 
 
+    useEffect(() => {
+        api.get("/me/")
+            .then((response) => {
+                const serverUser = response?.data?.user;
+                if (serverUser) {
+                    if (serverUser.username) {
+                        setDisplayName(serverUser.username);
+                        localStorage.setItem("username", serverUser.username);
+                    }
+                    if (serverUser.email) {
+                        setEmail(serverUser.email);
+                        localStorage.setItem("email", serverUser.email);
+                    }
+                }
+            })
+            .catch(() => {});
+    }, []);
+
+
     /* =====================================================
        NOTIFICATIONS
     ===================================================== */
@@ -824,6 +844,9 @@ export default function Settings() {
             storedUsername ||
             "User";
 
+        const finalEmail =
+            email.trim();
+
 
         localStorage.setItem(
             "username",
@@ -832,8 +855,15 @@ export default function Settings() {
 
         localStorage.setItem(
             "email",
-            email.trim()
+            finalEmail
         );
+
+        api.patch("/me/", {
+            username: finalName,
+            email: finalEmail,
+        }).catch((err) => {
+            console.error("Profile sync error:", err?.response?.data || err);
+        });
 
         localStorage.setItem(
             "pushNotifications",

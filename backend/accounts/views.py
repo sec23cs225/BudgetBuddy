@@ -448,20 +448,41 @@ def google_login(request):
 # CURRENT USER / SESSION CHECK
 # ============================================================
 
-@api_view(["GET"])
+@api_view(["GET", "PATCH"])
 @permission_classes([IsAuthenticated])
 def me(request):
 
     """
-    Return the currently authenticated BudgetBuddy user.
+    Return or update the currently authenticated BudgetBuddy user profile.
 
-    This endpoint is used by ProtectedRoute to determine
-    whether the current authentication session is valid.
-
-    The JWT itself is never returned to the frontend.
+    This endpoint is used by ProtectedRoute to verify sessions and
+    by Settings to update the user's registered email address.
     """
 
     user = request.user
+
+    if request.method == "PATCH":
+        new_email = request.data.get("email")
+        if new_email is not None:
+            new_email = new_email.strip().lower()
+            if new_email and User.objects.filter(email__iexact=new_email).exclude(id=user.id).exists():
+                return Response(
+                    {"error": "This email address is already in use by another account."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user.email = new_email
+            user.save(update_fields=["email"])
+
+        new_username = request.data.get("username")
+        if new_username:
+            new_username = new_username.strip()
+            if User.objects.filter(username__iexact=new_username).exclude(id=user.id).exists():
+                return Response(
+                    {"error": "This username is already taken."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user.username = new_username
+            user.save(update_fields=["username"])
 
     return Response(
         {
